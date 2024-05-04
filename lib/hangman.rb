@@ -1,25 +1,24 @@
 class Game
     def initialize
-        @error_count = 6
-        @word = select_word
+        @word = select_word.downcase
+        @word_array = @word.split("")
         @guess_slots = create_slots
-        @board = Board.new(@error_count, @word, @guess_slots)
-        @board.display_board
+        @error_count = create_count
+        @board = Board.new
+        @board.display_board(@error_count, @guess_slots)
         play_game
     end
-
-    puts "Hangman initializing..."
-
+# sample the dictionary text file until a word between 5 and 12 characters
+# is found
     def select_word
         word_pool = File.readlines('word_dictionary.txt')
         word = ''
         until word.length >= 5 && word.length <= 12
             word = word_pool.sample.chomp
         end
-        puts word
         word
     end
-
+# create the letter slots for the guesses
     def create_slots
         slots = []
         until slots.length == @word.length
@@ -27,49 +26,96 @@ class Game
         end
         slots
     end
-    
-    def play_game
-        guess = get_input
+# create the number of errors alloted to the player based on the
+# length of the word
+    def create_count
+        return @word_array.length + 1
     end
-
+# play the game until the player has guessed the word or has run
+# out of errors, then display the appropriate end message
+    def play_game
+        until @guess_slots == @word_array || @error_count == 0
+            guess = get_input
+            check_guess(guess)
+        end
+        @board.display_end_game(check_game)
+    end
+# get the player's input and check that the input is a single character
     def get_input
-        puts "Guess a letter"
-        guess = gets.chomp.upcase
+        @board.gets_prompt
+        guess = gets.chomp.downcase
         until guess.length == 1
-            puts "Error: type a single character to guess"
-            guess = gets.chomp.upcase
+            @board.error_prompt
+            guess = gets.chomp.downcase
         end
         guess
     end
-
+# check to see if the player has guessed correctly, update related
+# variables, and display the board
     def check_guess(guess)
-        unless @word.inlcude? guess
+        unless @word.include? guess
             @error_count -= 1
-            @game.display_incorrect(guess)
+            @board.display_incorrect(guess)
         else
+            @board.display_correct(guess)
             update_slots(guess)
         end
-        @game.display_board
+        @board.display_board(@error_count, @guess_slots)
     end
-
+# update the guess slots with the player's guess character
     def update_slots(guess)
+        @word_array.each_with_index do |char, index|
+            if guess == char
+                @guess_slots[index] = guess
+            end
+        end
+    end
+# check if the player won or lost and return the appropriate
+# message
+    def check_game
+        if @guess_slots == @word_array
+            return "You have won the game!"
+        else
+            return "Your man is hanged! You have lost!"
+        end
     end
 end
 
 class Board
-    def initialize(count, word, slots)
-        @count = count
-        @word = word
-        @guess_slots = slots
+# displays initialize message
+    def initialize
+        puts "Hangman initializing..."
+        space
     end
-
-    def display_board
-        puts "Incorrect guesses left: #{@count}"
-        puts @guess_slots.join(' ')
+# display gets prompt
+    def gets_prompt
+        puts "Guess a letter"
     end
-
+# display error prompt
+    def error_prompt
+        puts "Error: type a single character to guess"
+    end
+# display the error count and the guess slots
+    def display_board(count, slots)
+        puts "Incorrect guesses left: #{count}"
+        puts slots.join(' ')
+        space
+    end
+# indicate that the player's guess is in the word
+    def display_correct(guess)
+        puts "The letter '#{guess}' is in this word"
+    end
+# indicate that the player's guess is not in the word
     def display_incorrect(guess)
         puts "The letter '#{guess}' is not in this word"
+    end
+# indicate that the player has either won or lost
+    def display_end_game(message)
+        puts message
+    end
+# used to separate messages
+    def space
+        puts ""
     end
 end
 
