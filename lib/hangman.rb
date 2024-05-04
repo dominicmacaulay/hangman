@@ -3,7 +3,8 @@ class Game
         @word = select_word.downcase
         @word_array = @word.split("")
         @guess_slots = create_slots
-        @error_count = create_count
+        @error_count = 6
+        @guessed_letters = []
         @board = Board.new
         @board.display_board(@error_count, @guess_slots)
         play_game
@@ -25,11 +26,6 @@ class Game
             slots.push('_')
         end
         slots
-    end
-# create the number of errors alloted to the player based on the
-# length of the word
-    def create_count
-        return @word_array.length + 1
     end
 # play the game until the player has guessed the word or has run
 # out of errors, then display the appropriate end message
@@ -60,7 +56,8 @@ class Game
             @board.display_correct(guess)
             update_slots(guess)
         end
-        @board.display_board(@error_count, @guess_slots)
+        @guessed_letters.push(guess)
+        @board.display_board(@error_count, @guess_slots, @guessed_letters)
     end
 # update the guess slots with the player's guess character
     def update_slots(guess)
@@ -96,8 +93,9 @@ class Board
         puts "Error: type a single character to guess"
     end
 # display the error count and the guess slots
-    def display_board(count, slots)
+    def display_board(count, slots, guessed_letters = ["none yet"])
         puts "Incorrect guesses left: #{count}"
+        puts "Guessed letters: #{guessed_letters.join(", ")}"
         puts slots.join(' ')
         space
     end
