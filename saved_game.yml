@@ -1,0 +1,33 @@
+--- !ruby/object:Game
+word: automobile
+word_array:
+- a
+- u
+- t
+- o
+- m
+- o
+- b
+- i
+- l
+- e
+guess_slots:
+- a
+- u
+- _
+- o
+- _
+- o
+- _
+- i
+- _
+- e
+error_count: 9
+guessed_letters:
+- a
+- e
+- i
+- o
+- u
+- s
+board: !ruby/object:Board {}
